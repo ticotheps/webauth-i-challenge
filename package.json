@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "server": "nodemon index.js",
-    "start": "node index.js",
+    "start": "node index.js"
   },
   "repository": {
     "type": "git",
@@ -16,5 +16,8 @@
   "bugs": {
     "url": "https://github.com/ticotheps/webauth-i-challenge/issues"
   },
-  "homepage": "https://github.com/ticotheps/webauth-i-challenge#readme"
+  "homepage": "https://github.com/ticotheps/webauth-i-challenge#readme",
+  "devDependencies": {
+    "nodemon": "^1.18.10"
+  }
 }
