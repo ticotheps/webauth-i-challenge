@@ -21,7 +21,7 @@ server.get('/', (req, res) => {
 server.post('/api/register', (req, res) => {
     let user = req.body;
 
-    /// hash the password
+    /// hashes the password
     const hash = bcrypt.hashSync(user.password, 8);
     user.password = hash;
 
@@ -34,7 +34,7 @@ server.post('/api/register', (req, res) => {
         })
 });
 
-
+// checks a user's username and password before allowing passage to '/api/login' endpoint
 server.post('/api/login', (req, res) => {
     let { username, password } = req.body;
 
@@ -78,6 +78,7 @@ function restricted(req, res, next) {
     }; 
 }
 
+// allows a user to gain access to the list of 'users' in the db
 server.get('/api/users', restricted, (req, res) => {
     Users.find()
         .then(users => {
