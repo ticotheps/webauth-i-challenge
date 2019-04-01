@@ -57,6 +57,9 @@ server.post('/api/login', (req, res) => {
         .then(user => {
             // check the password guess against the database
             if (user && bcrypt.compareSync(password, user.password)) {
+                // HERE is where we want to save cookie data regarding the session
+                req.session.username = user.username;
+
                 res.status(200).json({ messsage: `Welcome ${user.username}! You have received a cookie!` });
             } else {
                 res.status(401).json({ message: 'You shall not pass!' });
