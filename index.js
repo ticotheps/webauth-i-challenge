@@ -11,7 +11,23 @@ server.use(cors());
 
 server.get('/', (req, res) => {
     res.send("Yay! My server is working!");
-  });
+});
+
+server.post('/api/register', (req, res) => {
+    let user = req.body;
+
+    /// hash the password
+    const hash = bcrypt.hashSync(user.password, 8);
+    user.password = hash;
+
+    Users.add(user)
+        .then(savedUser => {
+            res.status(201).json(savedUser);
+        })
+        .catch(error => {
+            res.status(500).json(error);
+        })
+});
 
 const port = process.env.PORT || 4000;
 server.listen(port, () => console.log(`\n** Web-Auth-I Challenge API Running on port ${port} **\n`));
