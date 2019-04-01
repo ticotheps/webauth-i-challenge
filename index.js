@@ -130,5 +130,19 @@ server.get('/api/users', restricted, only('tico'), (req, res) => {
         });
 });
 
+server.get('/api/logout', (req, res) => {
+    if (req.session) {
+        req.session.destroy(error => {
+            if (error) {
+                res.send("You can checkout if you'd like, but you can never leave!");
+            } else {
+                res.send("Goodbye! Thanks for playing!");
+            }
+        });
+    } else {
+        res.end();
+    };
+});
+
 const port = process.env.PORT || 4000;
 server.listen(port, () => console.log(`\n** Web-Auth-I Challenge API Running on port ${port} **\n`));
