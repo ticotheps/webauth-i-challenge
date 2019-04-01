@@ -20,6 +20,14 @@ const sessionConfig = {
     httpOnly: true,
     resave: false,
     saveUninitialized: false,
+
+    store: new KnexSessionStore({
+        knex: db,
+        tablename: 'sessions',
+        sidfieldname: 'sid',
+        createtable: true,
+        clearInterval: 1000 * 60 * 60, // in ms
+    }),
 };
 
 server.use(helmet());
