@@ -40,8 +40,8 @@ server.post('/api/register', (req, res) => {
     user.password = hash;
 
     Users.add(user)
-        .then(savedUser => {
-            res.status(201).json(savedUser);
+        .then(saved => {
+            res.status(201).json(saved);
         })
         .catch(error => {
             res.status(500).json(error);
