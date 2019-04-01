@@ -2,15 +2,29 @@ const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
 const bcrypt = require('bcryptjs');
+const session = require('express-session');
 
 const db = require('./database/dbConfig.js');
 const Users = require('./users/users-model.js');
 
 const server = express();
 
+const sessionConfig = {
+    name: 'doodie',
+    secret: 'yankee doodle went to town',
+    cookie: {
+        maxAge: 1000 * 60 * 30, // equals 30 minutes
+        secure: false,
+    },
+    httpOnly: true,
+    resave: false,
+    saveUninitialized: false,
+};
+
 server.use(helmet());
 server.use(express.json());
 server.use(cors());
+server.use(session(sessionConfig));
 
 
 server.get('/', (req, res) => {
