@@ -53,6 +53,17 @@ server.post('/api/login', (req, res) => {
         })
 });
 
+// this middleware only allows for specific users to have access to the list of 'users' in the db
+function only(username) {
+    return function(req, res, next) {
+      if (req.headers.username === username) {
+        next();
+      } else {
+        res.status(403).json({ message: `You don't have access because you are not ${username}!` });
+      }
+    };
+}
+
 
 // middleware that checks the credentials of the user (in the headers of the GET request) 
 // before allowing access to the list of 'users'
@@ -79,7 +90,7 @@ function restricted(req, res, next) {
 }
 
 // allows a user to gain access to the list of 'users' in the db
-server.get('/api/users', restricted, (req, res) => {
+server.get('/api/users', restricted, only('tico'), (req, res) => {
     Users.find()
         .then(users => {
             res.json(users);
@@ -88,31 +99,6 @@ server.get('/api/users', restricted, (req, res) => {
             res.send(error);
         });
 });
-
-
-// this middleware only allows for specific users to have access
-// function only(username) {
-//     return function(req, res, next) {
-//       if (req.headers.username === username) {
-//         next();
-//       } else {
-//         res.status(403).json({ message: `You don't have access because you are not ${username}!` });
-//       }
-//     };
-// }
-
-
-// restrticts access to the '/api/login' endpoint to only users 
-// that provide the right credentials in the heaaders
-// server.get('/api/users', restricted, only('frodo'), (req, res) => {
-//     Users.find()
-//         .then(users => {
-//             res.status(200).json(users);
-//         })
-//         .catch(error => {
-//             res.status(500).json(error);
-//         });
-// });
 
 const port = process.env.PORT || 4000;
 server.listen(port, () => console.log(`\n** Web-Auth-I Challenge API Running on port ${port} **\n`));
