@@ -50,19 +50,8 @@ server.post('/api/login', (req, res) => {
         })
 });
 
-// restrticts access to the '/api/login' endpoint to only users 
-// that provide the right credentials in the heaaders
-server.get('/api/users', restricted, (req, res) => {
-    Users.find()
-        .then(users => {
-            res.status(200).json(users);
-        })
-        .catch(error => {
-            res.status(500).json(error);
-        });
-});
 
-// middleware that 
+// middleware that checks the credentials of the user before allowing authentication
 function restricted(req, res, next) {
     const { username, password } = req.headers;
 
@@ -85,6 +74,31 @@ function restricted(req, res, next) {
         res.status(401).json({ message: 'No credentials provided' });
     }; 
 }
+
+
+// this middleware only allows for specific users to have access
+function only(username) {
+    return function(req, res, next) {
+      if (req.headers.username === username) {
+        next();
+      } else {
+        res.status(403).json({ message: `You don't have access because you are not ${username}!` });
+      }
+    };
+}
+
+
+// restrticts access to the '/api/login' endpoint to only users 
+// that provide the right credentials in the heaaders
+server.get('/api/users', restricted, only('frodo'), (req, res) => {
+    Users.find()
+        .then(users => {
+            res.status(200).json(users);
+        })
+        .catch(error => {
+            res.status(500).json(error);
+        });
+});
 
 
 const port = process.env.PORT || 4000;
