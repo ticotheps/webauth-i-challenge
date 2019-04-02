@@ -1,14 +1,13 @@
 const express = require('express');
 const helmet = require('helmet');
 const cors = require('cors');
-const bcrypt = require('bcryptjs');
+// const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const KnexSessionStore = require('connect-session-knex')(session);
 
-const db = require('../database/dbConfig.js');
-const Users = require('../users/users-model.js');
-
+const authRouter = require('../auth/auth-router.js');
 const usersRouter = require('../users/users-router.js');
+const configuredKnex = require('../database/dbConfig.js');
 
 const server = express();
 
@@ -26,7 +25,7 @@ const sessionConfig = {
     // "true" = forces user to accept cookies
 
     store: new KnexSessionStore({
-        knex: db,
+        knex: configuredKnex,
         tablename: 'sessions',
         sidfieldname: 'sid',
         createtable: true,
@@ -38,68 +37,12 @@ server.use(helmet());
 server.use(express.json());
 server.use(cors());
 server.use(session(sessionConfig));
-server.use('/api/users', usersRouter);
 
+server.use('/api/auth', authRouter);
+server.use('/api/users', usersRouter);
 
 server.get('/', (req, res) => {
     res.send("Yay! My server is working!");
-});
-
-// allows a user to add a username and hashed password to the database
-server.post('/api/register', (req, res) => {
-    let user = req.body;
-
-    /// hashes the password
-    const hash = bcrypt.hashSync(user.password, 8);
-    user.password = hash;
-
-    Users.add(user)
-        .then(saved => {
-            // HERE is where we can PERSIST the session data for the user
-            req.session.username = saved;
-
-            res.status(201).json(saved);
-        })
-        .catch(error => {
-            res.status(500).json(error);
-        })
-});
-
-// checks a user's username and password before allowing passage to '/api/login' endpoint
-server.post('/api/login', (req, res) => {
-    let { username, password } = req.body;
-
-    Users.findBy({ username })
-        .first()
-        .then(user => {
-            // check the password guess against the database
-            if (user && bcrypt.compareSync(password, user.password)) {
-                // HERE is where we want to save cookie data regarding the session
-                req.session.username = user.username;
-
-                res.status(200).json({ messsage: `Welcome ${user.username}! You have received a cookie!` });
-            } else {
-                res.status(401).json({ message: 'You shall not pass!' });
-            }           
-        })
-        .catch(error => {
-            res.status(500).json(error);
-        })
-});
-
-// allows the user to log out of the current session
-server.get('/api/logout', (req, res) => {
-    if (req.session) {
-        req.session.destroy(error => {
-            if (error) {
-                res.send("You can checkout if you'd like, but you can never leave!");
-            } else {
-                res.send("Goodbye! Thanks for playing!");
-            }
-        });
-    } else {
-        res.end();
-    };
 });
 
 module.exports = server;
